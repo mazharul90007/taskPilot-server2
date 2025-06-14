@@ -1,0 +1,103 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String                @id @default(auto()) @map("_id") @db.ObjectId
+  usernId   String                @unique
+  usernName String
+  email     String                @unique
+  password  String
+  role      UserRole
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  teams     UserAssignedTeam[]    @relation("UserTeams")
+  projects  UserAssignedProject[] @relation("UserProjects")
+}
+
+model Team {
+  id        String              @id @default(auto()) @map("_id") @db.ObjectId
+  teamName  String
+  members   UserAssignedTeam[]  @relation("TeamMembers")
+  projects  Project[]           @relation("TeamProjects")
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+model UserAssignedTeam {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  teamId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], name: "UserTeams")
+  team      Team     @relation(fields: [teamId], references: [id], name: "TeamMembers")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, teamId])
+}
+
+model Project {
+  id               String                @id @default(auto()) @map("_id") @db.ObjectId
+  station          String
+  deadline         DateTime
+  value            Float
+  team             Team?                 @relation(fields: [teamId], references: [id], name: "TeamProjects")
+  teamId           String?               @db.ObjectId
+  ui               String?
+  frontend         String?
+  backend         String?
+  lastUpdate       DateTime?             @updatedAt
+  lastMeeting      DateTime?
+  projectStatus    ProjectStatus         @default(planning)
+  estimateDelivery DateTime?
+  clientStatus     ClientStatus          @default(active)
+  rating           Int?                  @default(0)
+  figmaLink        String?
+  liveLink         String?
+  deliveredDate    DateTime?
+  requirementsLink String?
+  note             String?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  assignedUsers    UserAssignedProject[] @relation("ProjectAssignments")
+}
+
+model UserAssignedProject {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  projectId String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], name: "UserProjects")
+  project   Project  @relation(fields: [projectId], references: [id], name: "ProjectAssignments")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, projectId])
+}
+
+enum ProjectStatus {
+  planning
+  in_progress
+  on_hold
+  completed
+  delivered
+  cancelled
+}
+
+enum ClientStatus {
+  active
+  satisfied
+  follow_up
+  dissatisfied
+  inactive
+}
+
+enum UserRole {
+  admin
+  leader
+  member
+}
