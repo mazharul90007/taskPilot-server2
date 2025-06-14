@@ -6,7 +6,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import status from "http-status";
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
-import router from './app/routes';
+// import router from './app/routes';
 
 const app: Application = express();
 app.use(cors());
