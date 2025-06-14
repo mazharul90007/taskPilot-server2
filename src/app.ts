@@ -24,6 +24,7 @@ app.get('/', (req: Request, res: Response) => {
 
 // app.use('/api/v1', router);
 // global error handeling
+// Testing connection
 
 app.use(globalErrorHandler);
 
