@@ -21,6 +21,16 @@ const createUserIntoDB = async (payload: Partial<User>) => {
       password: hashedPassword,
       role,
     },
+    select: {
+      id: true,
+      userId: true,
+      userName: true,
+      email: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
 
   return result;
