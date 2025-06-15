@@ -18,8 +18,8 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const auth_utils_1 = require("./auth.utils");
 const config_1 = __importDefault(require("../../../config"));
 const prisma = new client_1.PrismaClient();
-const loginUser = (email, password) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield prisma.user.findUnique({ where: { email } });
+const loginUser = (userId, password) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma.user.findUnique({ where: { userId } });
     if (!user) {
         throw new Error("Invalid email or password");
     }
