@@ -14,4 +14,12 @@ router.post(
     teamController.createTeam
 );
 
+router.get("/", teamController.getAllTeams)
+
+router.delete(
+    "/:id",
+    // auth(UserRole.admin, UserRole.leader),
+    teamController.deleteTeam
+)
+
 export const teamRoutes = router;

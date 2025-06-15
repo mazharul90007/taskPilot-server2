@@ -6,18 +6,45 @@ import status from "http-status";
 
 
 //create team
-const createTeam = catchAsync(async(req: Request, res: Response)=>{
-const payload = req.body;
-const result = await teamService.createTeamIntoDB(payload);
+const createTeam = catchAsync(async (req: Request, res: Response) => {
+    const payload = req.body;
+    const result = await teamService.createTeamIntoDB(payload);
 
-sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: 'Team created Successfully',
-    data: result,
+    sendResponse(res, {
+        statusCode: status.OK,
+        success: true,
+        message: 'Team created Successfully',
+        data: result,
+    });
 });
+
+//get all team
+const getAllTeams = catchAsync(async (req: Request, res: Response) => {
+    const result = await teamService.getAllTeamsFromDB();
+
+    sendResponse(res, {
+        statusCode: status.OK,
+        success: true,
+        message: "Team retrieved successfully",
+        data: result,
+    })
+})
+
+//delete team
+const deleteTeam = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await teamService.deleteTeamFromDB(id);
+
+    sendResponse(res, {
+        statusCode: status.OK,
+        success: true,
+        message: "Team deleted Successfully",
+        data: result
+    })
 })
 
 export const teamController = {
-    createTeam
+    createTeam,
+    deleteTeam,
+    getAllTeams
 }

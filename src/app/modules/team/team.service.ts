@@ -1,6 +1,7 @@
-import { PrismaClient, Team } from "@prisma/client";
+import { Team } from "@prisma/client";
+import prisma from "../../../lib/prisma"
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 //create a team
 const createTeamIntoDB = async (payload: { teamName: string; members: string[] }) => {
@@ -55,6 +56,36 @@ const createTeamIntoDB = async (payload: { teamName: string; members: string[] }
     return result
 }
 
+//==================Get all Team ===============
+const getAllTeamsFromDB = async () => {
+    const result = await prisma.team.findMany({
+        include: {
+            members: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    });
+    return result;
+}
+
+//==================Delete a Team =================
+const deleteTeamFromDB = async (id: string) => {
+    //first delete all team assignment
+    await prisma.userAssignedTeam.deleteMany({
+        where: { teamId: id }
+    });
+
+    //now delete the team
+    const result = await prisma.team.delete({
+        where: { id }
+    });
+    return result;
+};
+
 export const teamService = {
-    createTeamIntoDB
+    createTeamIntoDB,
+    deleteTeamFromDB,
+    getAllTeamsFromDB
 }
