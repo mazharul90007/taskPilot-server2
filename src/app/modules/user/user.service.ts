@@ -1,43 +1,74 @@
-import { PrismaClient } from '@prisma/client';
-import { CreateUserInput } from './user.validation';
-import * as bcrypt from 'bcrypt';
+import { PrismaClient, User } from "@prisma/client";
+import bcrypt from "bcrypt";
 
-export class UserService {
-  private prisma: PrismaClient;
+const prisma = new PrismaClient();
 
-  constructor() {
-    this.prisma = new PrismaClient();
+// Create user
+const createUserIntoDB = async (payload: Partial<User>) => {
+  const { userId, userName, email, password, role } = payload;
+
+  if (!userId || !userName || !email || !password || !role) {
+    throw new Error("Missing required user fields");
   }
 
-  async createUser(userData: CreateUserInput) {
-    // Check if user with email already exists
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: userData.email }
-    });
+  const hashedPassword = await bcrypt.hash(password, 12);
 
-    if (existingUser) {
-      throw {
-        status: 400,
-        message: 'User with this email already exists'
-      };
-    }
+  const result = await prisma.user.create({
+    data: {
+      userId,
+      userName,
+      email,
+      password: hashedPassword,
+      role,
+    },
+  });
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
+  return result;
+};
 
-    // Create user
-    const user = await this.prisma.user.create({
-      data: {
-        userId: userData.userId,
-        userName: userData.userName,
-        email: userData.email,
-        password: hashedPassword,
-        role: userData.role
-      }
-    });
+// Get all user
+const getAllUsersFromDB = async () => {
+  const result = await prisma.user.findMany();
+  return result;
+};
 
-    // Remove password from response
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+// Get single user from db
+const getSingleUserFromDB = async (id: string) => {
+  const result = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!result) {
+    throw new Error("User not found");
   }
-}
+
+  return result;
+};
+
+// Update User
+const updateUserInDB = async (id: string, payload: Partial<User>) => {
+  const isExist = await prisma.user.findUnique({ where: { id } });
+
+  if (!isExist) {
+    throw new Error("User not found");
+  }
+
+  if (payload.password) {
+    // If password is being updated, hash it
+    payload.password = await bcrypt.hash(payload.password, 12);
+  }
+
+  const result = await prisma.user.update({
+    where: { id },
+    data: payload,
+  });
+
+  return result;
+};
+
+export const userService = {
+  createUserIntoDB,
+  getAllUsersFromDB,
+  getSingleUserFromDB,
+  updateUserInDB,
+};
