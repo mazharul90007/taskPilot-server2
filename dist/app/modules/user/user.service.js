@@ -1,37 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -41,53 +8,66 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserService = void 0;
+exports.userService = void 0;
 const client_1 = require("@prisma/client");
-const bcrypt = __importStar(require("bcrypt"));
-class UserService {
-    constructor() {
-        this.prisma = new client_1.PrismaClient();
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const prisma = new client_1.PrismaClient();
+// Create user
+const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId, userName, email, password, role } = payload;
+    if (!userId || !userName || !email || !password || !role) {
+        throw new Error("Missing required user fields");
     }
-    createUser(userData) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Check if user with email already exists
-            const existingUser = yield this.prisma.user.findUnique({
-                where: { email: userData.email }
-            });
-            if (existingUser) {
-                throw {
-                    status: 400,
-                    message: 'User with this email already exists'
-                };
-            }
-            // Hash password
-            const hashedPassword = yield bcrypt.hash(userData.password, 10);
-            // Create user
-            const user = yield this.prisma.user.create({
-                data: {
-                    userId: userData.userId,
-                    userName: userData.userName,
-                    email: userData.email,
-                    password: hashedPassword,
-                    role: userData.role
-                }
-            });
-            // Remove password from response
-            const { password } = user, userWithoutPassword = __rest(user, ["password"]);
-            return userWithoutPassword;
-        });
+    const hashedPassword = yield bcrypt_1.default.hash(password, 12);
+    const result = yield prisma.user.create({
+        data: {
+            userId,
+            userName,
+            email,
+            password: hashedPassword,
+            role,
+        },
+    });
+    return result;
+});
+// Get all user
+const getAllUsersFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma.user.findMany();
+    return result;
+});
+// Get single user from db
+const getSingleUserFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma.user.findUnique({
+        where: { id },
+    });
+    if (!result) {
+        throw new Error("User not found");
     }
-}
-exports.UserService = UserService;
+    return result;
+});
+// Update User
+const updateUserInDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const isExist = yield prisma.user.findUnique({ where: { id } });
+    if (!isExist) {
+        throw new Error("User not found");
+    }
+    if (payload.password) {
+        // If password is being updated, hash it
+        payload.password = yield bcrypt_1.default.hash(payload.password, 12);
+    }
+    const result = yield prisma.user.update({
+        where: { id },
+        data: payload,
+    });
+    return result;
+});
+exports.userService = {
+    createUserIntoDB,
+    getAllUsersFromDB,
+    getSingleUserFromDB,
+    updateUserInDB,
+};
