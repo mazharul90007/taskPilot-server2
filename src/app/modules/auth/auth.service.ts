@@ -5,11 +5,12 @@ import config from "../../../config";
 
 const prisma = new PrismaClient();
 
-const loginUser = async (email: string, password: string) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+const loginUser = async (userId: string, password: string) => {
+  const user = await prisma.user.findUnique({ where: { userId  } });
   if (!user) {
     throw new Error("Invalid email or password");
   }
+  
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {

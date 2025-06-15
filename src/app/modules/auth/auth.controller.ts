@@ -5,13 +5,14 @@ import sendResponse from "../../../shared/sendResponse";
 import status from "http-status";
 
 const login = catchAsync(async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { userId , password } = req.body;
 
-  if (!email || !password) {
-    throw new Error("Email and password are required");
-  }
+  // if (!userId  || !password) {
+  //   throw new Error("userId  and password are required");
+  // }
 
-  const result = await authService.loginUser(email, password);
+
+  const result = await authService.loginUser(userId , password);
 
   sendResponse(res, {
     statusCode: status.OK,

@@ -18,11 +18,11 @@ const auth_service_1 = require("./auth.service");
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
 const login = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        throw new Error("Email and password are required");
-    }
-    const result = yield auth_service_1.authService.loginUser(email, password);
+    const { userId, password } = req.body;
+    // if (!userId  || !password) {
+    //   throw new Error("userId  and password are required");
+    // }
+    const result = yield auth_service_1.authService.loginUser(userId, password);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
