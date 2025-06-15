@@ -44,6 +44,8 @@ model UserAssignedTeam {
 
 model Project {
   id               String                @id @default(auto()) @map("_id") @db.ObjectId
+  projectName      String
+  projectId        String
   station          String
   deadline         DateTime
   value            Float
