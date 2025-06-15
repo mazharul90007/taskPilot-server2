@@ -9,11 +9,13 @@ const cors_1 = __importDefault(require("cors"));
 // import httpStatus from 'http-status';
 // import globalErrorHandler from './app/middlewares/globalErrorHandler';
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const http_status_1 = __importDefault(require("http-status"));
 const globalErrorHandler_1 = __importDefault(require("./app/middlewares/globalErrorHandler"));
 const routes_1 = __importDefault(require("./app/routes"));
+const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
+// import router from './app/routes';
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
+// app.use(cors({ origin: "http://localhost:3000" }));
 app.use((0, cookie_parser_1.default)());
 //parser
 app.use(express_1.default.json());
@@ -24,16 +26,8 @@ app.get('/', (req, res) => {
     });
 });
 app.use('/api/v1', routes_1.default);
-// global error handling
+// global error handeling
 app.use(globalErrorHandler_1.default);
-app.use((req, res, next) => {
-    res.status(http_status_1.default.NOT_FOUND).json({
-        success: false,
-        message: "API NOT FOUND!",
-        error: {
-            path: req.originalUrl,
-            message: "Your requested path is not found!"
-        }
-    });
-});
+//Not Found
+app.use(notFound_1.default);
 exports.default = app;
