@@ -12,22 +12,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.teamController = void 0;
-const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
-const team_service_1 = require("./team.service");
-const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
-const http_status_1 = __importDefault(require("http-status"));
-//create team
-const createTeam = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const payload = req.body;
-    const result = yield team_service_1.teamService.createTeamIntoDB(payload);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: 'Team created Successfully',
-        data: result,
+const auth_utils_1 = require("../modules/auth/auth.utils");
+const config_1 = __importDefault(require("../../config"));
+const auth = (...roles) => {
+    return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
+            if (!token) {
+                throw new Error("Your are not authorized");
+            }
+            const decoded = auth_utils_1.JwtUtils.verifyToken(token, config_1.default.jwt_access_secret);
+            if (!roles.includes(decoded.role)) {
+                throw new Error("Your are not authorized");
+            }
+            req.user = decoded;
+            next();
+        }
+        catch (error) {
+            next(error);
+        }
     });
-}));
-exports.teamController = {
-    createTeam
 };
+exports.default = auth;
