@@ -22,21 +22,20 @@ app.get('/', (req: Request, res: Response) => {
     })
 });
 
-// app.use('/api/v1', router);
-// global error handeling
-// Testing connection
+app.use('/api/v1', router);
 
+// global error handling
 app.use(globalErrorHandler);
 
-// app.use((req: Request, res: Response, next: NextFunction) => {
-//     res.status(status.NOT_FOUND).json({
-//         success: false,
-//         message: "API NOT FOUND!",
-//         error: {
-//             path: req.originalUrl,
-//             message: "Your requested path is not found!"
-//         }
-//     })
-// })
+app.use((req: Request, res: Response, next: NextFunction) => {
+    res.status(status.NOT_FOUND).json({
+        success: false,
+        message: "API NOT FOUND!",
+        error: {
+            path: req.originalUrl,
+            message: "Your requested path is not found!"
+        }
+    })
+});
 
 export default app;
