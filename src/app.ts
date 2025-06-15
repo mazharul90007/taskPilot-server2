@@ -7,9 +7,12 @@ import cookieParser from 'cookie-parser';
 import status from "http-status";
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import router from './app/routes';
+import notFound from './app/middlewares/notFound';
+// import router from './app/routes';
 
 const app: Application = express();
 app.use(cors());
+// app.use(cors({ origin: "http://localhost:3000" }));
 app.use(cookieParser());
 
 //parser
@@ -24,18 +27,11 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api/v1', router);
 
-// global error handling
+// global error handeling
 app.use(globalErrorHandler);
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-    res.status(status.NOT_FOUND).json({
-        success: false,
-        message: "API NOT FOUND!",
-        error: {
-            path: req.originalUrl,
-            message: "Your requested path is not found!"
-        }
-    })
-});
+
+//Not Found
+app.use(notFound);
 
 export default app;

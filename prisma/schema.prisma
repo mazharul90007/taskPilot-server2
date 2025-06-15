@@ -9,9 +9,10 @@ generator client {
 
 model User {
   id        String                @id @default(auto()) @map("_id") @db.ObjectId
-  userId   String                @unique
-  userName String
+  userId    String                @unique
+  userName  String
   email     String                @unique
+  isActive  Boolean               @default(true)
   password  String
   role      UserRole
   createdAt DateTime              @default(now())
@@ -21,12 +22,12 @@ model User {
 }
 
 model Team {
-  id        String              @id @default(auto()) @map("_id") @db.ObjectId
+  id        String             @id @default(auto()) @map("_id") @db.ObjectId
   teamName  String
-  members   UserAssignedTeam[]  @relation("TeamMembers")
-  projects  Project[]           @relation("TeamProjects")
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
+  members   UserAssignedTeam[] @relation("TeamMembers")
+  projects  Project[]          @relation("TeamProjects")
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
 }
 
 model UserAssignedTeam {
@@ -50,7 +51,7 @@ model Project {
   teamId           String?               @db.ObjectId
   ui               String?
   frontend         String?
-  backend         String?
+  backend          String?
   lastUpdate       DateTime?             @updatedAt
   lastMeeting      DateTime?
   projectStatus    ProjectStatus         @default(planning)
