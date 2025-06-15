@@ -1,9 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+// import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { JwtUtils } from "./auth.utils";
 import config from "../../../config";
+import prisma from "../../../lib/prisma";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 const loginUser = async (userId: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { userId  } });

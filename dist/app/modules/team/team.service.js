@@ -8,17 +8,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.teamService = void 0;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../../../lib/prisma"));
+// const prisma = new PrismaClient();
 //create a team
 const createTeamIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { teamName, members } = payload;
     // console.log(teamName, members)
     // First verify all users exist
     for (const userId of members) {
-        const user = yield prisma.user.findUnique({
+        const user = yield prisma_1.default.user.findUnique({
             where: { userId }
         });
         if (!user) {
@@ -26,14 +29,14 @@ const createTeamIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
         }
     }
     //create team
-    const team = yield prisma.team.create({
+    const team = yield prisma_1.default.team.create({
         data: {
             teamName,
         }
     });
     //add members to the team
     for (const userId of members) {
-        yield prisma.userAssignedTeam.create({
+        yield prisma_1.default.userAssignedTeam.create({
             data: {
                 userId,
                 teamId: team.id,
@@ -41,7 +44,7 @@ const createTeamIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
         });
     }
     // Return the team with its members
-    const result = yield prisma.team.findUnique({
+    const result = yield prisma_1.default.team.findUnique({
         where: { id: team.id },
         include: {
             members: {
@@ -60,6 +63,33 @@ const createTeamIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
     });
     return result;
 });
+//==================Get all Team ===============
+const getAllTeamsFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.team.findMany({
+        include: {
+            members: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    });
+    return result;
+});
+//==================Delete a Team =================
+const deleteTeamFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    //first delete all team assignment
+    yield prisma_1.default.userAssignedTeam.deleteMany({
+        where: { teamId: id }
+    });
+    //now delete the team
+    const result = yield prisma_1.default.team.delete({
+        where: { id }
+    });
+    return result;
+});
 exports.teamService = {
-    createTeamIntoDB
+    createTeamIntoDB,
+    deleteTeamFromDB,
+    getAllTeamsFromDB
 };

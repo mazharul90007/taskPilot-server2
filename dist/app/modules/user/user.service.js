@@ -13,9 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userService = void 0;
-const client_1 = require("@prisma/client");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../../../lib/prisma"));
+// const prisma = new PrismaClient();
 // Create user
 const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId, userName, email, password, role } = payload;
@@ -23,7 +23,7 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
         throw new Error("Missing required user fields");
     }
     const hashedPassword = yield bcrypt_1.default.hash(password, 12);
-    const result = yield prisma.user.create({
+    const result = yield prisma_1.default.user.create({
         data: {
             userId,
             userName,
@@ -36,12 +36,12 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
 });
 // Get all user
 const getAllUsersFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma.user.findMany();
+    const result = yield prisma_1.default.user.findMany();
     return result;
 });
 // Get single user from db
 const getSingleUserFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma.user.findUnique({
+    const result = yield prisma_1.default.user.findUnique({
         where: { id },
     });
     if (!result) {
@@ -51,7 +51,7 @@ const getSingleUserFromDB = (id) => __awaiter(void 0, void 0, void 0, function* 
 });
 // Update User
 const updateUserInDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExist = yield prisma.user.findUnique({ where: { id } });
+    const isExist = yield prisma_1.default.user.findUnique({ where: { id } });
     if (!isExist) {
         throw new Error("User not found");
     }
@@ -59,7 +59,7 @@ const updateUserInDB = (id, payload) => __awaiter(void 0, void 0, void 0, functi
         // If password is being updated, hash it
         payload.password = yield bcrypt_1.default.hash(payload.password, 12);
     }
-    const result = yield prisma.user.update({
+    const result = yield prisma_1.default.user.update({
         where: { id },
         data: payload,
     });

@@ -13,13 +13,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authService = void 0;
-const client_1 = require("@prisma/client");
+// import { PrismaClient } from "@prisma/client";
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const auth_utils_1 = require("./auth.utils");
 const config_1 = __importDefault(require("../../../config"));
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../../../lib/prisma"));
+// const prisma = new PrismaClient();
 const loginUser = (userId, password) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield prisma.user.findUnique({ where: { userId } });
+    const user = yield prisma_1.default.user.findUnique({ where: { userId } });
     if (!user) {
         throw new Error("Invalid email or password");
     }
