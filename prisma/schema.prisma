@@ -20,6 +20,7 @@ model User {
   updatedAt DateTime              @updatedAt
   teams     UserAssignedTeam[]    @relation("UserTeams")
   projects  UserAssignedProject[] @relation("UserProjects")
+  payments  Payment[] 
 }
 
 model Team {
@@ -82,6 +83,21 @@ model UserAssignedProject {
 
   @@unique([userId, projectId])
 }
+
+
+model Payment {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  stripeSessionId String
+  productName     String
+  amount          Int
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+
+  //  Relation to User
+  userId          String   @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id])
+}
+
 
 enum ProjectStatus {
   planning
