@@ -7,6 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 model User {
   id               String                  @id @default(auto()) @map("_id") @db.ObjectId
   userId           String                  @unique
@@ -22,6 +23,7 @@ model User {
   uiProjects       ProjectUIMember[]
   frontendProjects ProjectFrontendMember[]
   backendProjects  ProjectBackendMember[]
+  payments  Payment[] 
 }
 
 model Team {
@@ -118,6 +120,21 @@ model UserAssignedProject {
 
   @@unique([userId, projectId])
 }
+
+
+model Payment {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  stripeSessionId String
+  productName     String
+  amount          Int
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+
+  //  Relation to User
+  userId          String   @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id])
+}
+
 
 enum ProjectStatus {
   planning
