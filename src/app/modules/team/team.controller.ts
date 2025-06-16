@@ -30,6 +30,19 @@ const getAllTeams = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
+//============get single team===========
+const getSingleTeam = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await teamService.getSingleTeamFromDB(id);
+
+    sendResponse(res, {
+        statusCode: status.OK,
+        success: true,
+        message: "Team retrieved successfully",
+        data: result,
+    })
+})
+
 //delete team
 const deleteTeam = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -61,5 +74,6 @@ export const teamController = {
     createTeam,
     deleteTeam,
     getAllTeams,
-    updateTeam
+    updateTeam,
+    getSingleTeam
 }

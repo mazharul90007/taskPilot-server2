@@ -75,6 +75,23 @@ const getAllTeamsFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
     });
     return result;
 });
+//=============Get single Team ==============
+const getSingleTeamFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.team.findUnique({
+        where: { id },
+        include: {
+            members: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    });
+    if (!result) {
+        throw new Error("Team not found");
+    }
+    return result;
+});
 //==================Delete a Team =================
 const deleteTeamFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     //first delete all team assignment
@@ -147,5 +164,6 @@ exports.teamService = {
     createTeamIntoDB,
     deleteTeamFromDB,
     getAllTeamsFromDB,
-    updateTeamInDB
+    updateTeamInDB,
+    getSingleTeamFromDB
 };

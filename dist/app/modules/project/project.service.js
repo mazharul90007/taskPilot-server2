@@ -88,6 +88,164 @@ const createProjectIntoDB = (payload) => __awaiter(void 0, void 0, void 0, funct
     });
     return result;
 });
+//==============================get all project============
+const getAllProjectsfromDB = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.project.findMany({
+        include: {
+            team: true,
+            uiMembers: {
+                include: {
+                    user: true
+                }
+            },
+            frontendMembers: {
+                include: {
+                    user: true
+                }
+            },
+            backendMembers: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    });
+    return result;
+});
+//=====================get a single Project ================
+const getSingleProjectFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.project.findUnique({
+        where: { id },
+        include: {
+            team: true,
+            uiMembers: {
+                include: {
+                    user: true
+                }
+            },
+            frontendMembers: {
+                include: {
+                    user: true
+                }
+            },
+            backendMembers: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    });
+    if (!result) {
+        throw new Error('Project not found');
+    }
+    return result;
+});
+//=======================Update Project ====================
+const updateProjectInDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { uiMemberIds, frontendMemberIds, backendMemberIds } = payload, projectData = __rest(payload, ["uiMemberIds", "frontendMemberIds", "backendMemberIds"]);
+    // Update basic project data
+    yield prisma_1.default.project.update({
+        where: { id },
+        data: Object.assign(Object.assign({}, projectData), { deadline: projectData.deadline ? new Date(projectData.deadline) : undefined })
+    });
+    // Update UI members if provided
+    if (uiMemberIds) {
+        // Delete existing UI members
+        yield prisma_1.default.projectUIMember.deleteMany({
+            where: { projectId: id }
+        });
+        // Add new UI members
+        for (const userId of uiMemberIds) {
+            yield prisma_1.default.projectUIMember.create({
+                data: {
+                    projectId: id,
+                    userId
+                }
+            });
+        }
+    }
+    // Update Frontend members if provided
+    if (frontendMemberIds) {
+        // Delete existing Frontend members
+        yield prisma_1.default.projectFrontendMember.deleteMany({
+            where: { projectId: id }
+        });
+        // Add new Frontend members
+        for (const userId of frontendMemberIds) {
+            yield prisma_1.default.projectFrontendMember.create({
+                data: {
+                    projectId: id,
+                    userId
+                }
+            });
+        }
+    }
+    // Update Backend members if provided
+    if (backendMemberIds) {
+        // Delete existing Backend members
+        yield prisma_1.default.projectBackendMember.deleteMany({
+            where: { projectId: id }
+        });
+        // Add new Backend members
+        for (const userId of backendMemberIds) {
+            yield prisma_1.default.projectBackendMember.create({
+                data: {
+                    projectId: id,
+                    userId
+                }
+            });
+        }
+    }
+    // Return updated project with all relations
+    const result = yield prisma_1.default.project.findUnique({
+        where: { id },
+        include: {
+            team: true,
+            uiMembers: {
+                include: {
+                    user: true
+                }
+            },
+            frontendMembers: {
+                include: {
+                    user: true
+                }
+            },
+            backendMembers: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    });
+    return result;
+});
+//=====================delete a Project =============
+const deleteProjectFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    //first delete all releted members
+    yield prisma_1.default.projectUIMember.deleteMany({
+        where: { projectId: id }
+    });
+    yield prisma_1.default.projectFrontendMember.deleteMany({
+        where: { projectId: id }
+    });
+    yield prisma_1.default.projectBackendMember.deleteMany({
+        where: { projectId: id }
+    });
+    //delete project assignments
+    yield prisma_1.default.userAssignedProject.deleteMany({
+        where: { projectId: id }
+    });
+    //now delete the project
+    const result = yield prisma_1.default.project.delete({
+        where: { id }
+    });
+    return result;
+});
 exports.projectService = {
-    createProjectIntoDB
+    createProjectIntoDB,
+    getAllProjectsfromDB,
+    updateProjectInDB,
+    deleteProjectFromDB,
+    getSingleProjectFromDB
 };
