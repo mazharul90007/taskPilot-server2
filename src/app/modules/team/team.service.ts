@@ -1,7 +1,5 @@
 import prisma from "../../../lib/prisma"
 
-// const prisma = new PrismaClient();
-
 //create a team
 const createTeamIntoDB = async (payload: { teamName: string; members: string[] }) => {
     const { teamName, members } = payload;

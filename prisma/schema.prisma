@@ -9,17 +9,20 @@ generator client {
 
 
 model User {
-  id        String                @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String                @unique
-  userName  String
-  email     String                @unique
-  isActive  Boolean               @default(true)
-  password  String
-  role      UserRole
-  createdAt DateTime              @default(now())
-  updatedAt DateTime              @updatedAt
-  teams     UserAssignedTeam[]    @relation("UserTeams")
-  projects  UserAssignedProject[] @relation("UserProjects")
+  id               String                  @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String                  @unique
+  userName         String
+  email            String                  @unique
+  isActive         Boolean                 @default(true)
+  password         String
+  role             UserRole
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  teams            UserAssignedTeam[]      @relation("UserTeams")
+  projects         UserAssignedProject[]   @relation("UserProjects")
+  uiProjects       ProjectUIMember[]
+  frontendProjects ProjectFrontendMember[]
+  backendProjects  ProjectBackendMember[]
   payments  Payment[] 
 }
 
@@ -45,38 +48,72 @@ model UserAssignedTeam {
 }
 
 model Project {
-  id               String                @id @default(auto()) @map("_id") @db.ObjectId
+  id               String                  @id @default(auto()) @map("_id") @db.ObjectId
   projectName      String
-  projectId        String
+  projectId        String                  @unique
   station          String
   deadline         DateTime
   value            Float
-  team             Team?                 @relation(fields: [teamId], references: [id], name: "TeamProjects")
-  teamId           String?               @db.ObjectId
-  ui               String?
-  frontend         String?
-  backend          String?
-  lastUpdate       DateTime?             @updatedAt
-  lastMeeting      DateTime?
-  projectStatus    ProjectStatus         @default(planning)
-  estimateDelivery DateTime?
-  clientStatus     ClientStatus          @default(active)
-  rating           Int?                  @default(0)
+  teamId           String?                 @db.ObjectId
+  team             Team?                   @relation(fields: [teamId], references: [id], name: "TeamProjects")
+  estimateDelivery String
+  projectStatus    ProjectStatus?
+  clientStatus     ClientStatus?
+  rating           Int?                    @default(0)
   figmaLink        String?
   liveLink         String?
   deliveredDate    DateTime?
   requirementsLink String?
   note             String?
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @updatedAt
-  assignedUsers    UserAssignedProject[] @relation("ProjectAssignments")
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  assignments      UserAssignedProject[]   @relation("ProjectAssignments")
+  uiMembers        ProjectUIMember[]
+  frontendMembers  ProjectFrontendMember[]
+  backendMembers   ProjectBackendMember[]
+}
+
+model ProjectUIMember {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId String   @db.ObjectId
+  userId    String
+  project   Project  @relation(fields: [projectId], references: [id])
+  user      User     @relation(fields: [userId], references: [userId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, userId])
+}
+
+model ProjectFrontendMember {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId String   @db.ObjectId
+  userId    String
+  project   Project  @relation(fields: [projectId], references: [id])
+  user      User     @relation(fields: [userId], references: [userId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, userId])
+}
+
+model ProjectBackendMember {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId String   @db.ObjectId
+  userId    String
+  project   Project  @relation(fields: [projectId], references: [id])
+  user      User     @relation(fields: [userId], references: [userId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, userId])
 }
 
 model UserAssignedProject {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
+  userId    String
   projectId String   @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id], name: "UserProjects")
+  user      User     @relation(fields: [userId], references: [userId], name: "UserProjects")
   project   Project  @relation(fields: [projectId], references: [id], name: "ProjectAssignments")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
