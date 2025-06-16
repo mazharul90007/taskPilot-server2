@@ -88,8 +88,65 @@ const deleteTeamFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () 
     });
     return result;
 });
+//========Upsate a Team =========
+const updateTeamInDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { teamName, members, removeMember } = payload;
+    // If removing a single member
+    if (removeMember) {
+        yield prisma_1.default.userAssignedTeam.deleteMany({
+            where: {
+                teamId: id,
+                userId: removeMember
+            }
+        });
+    }
+    // If updating the entire members list
+    else if (members) {
+        // Verify all users exist
+        for (const userId of members) {
+            const user = yield prisma_1.default.user.findUnique({
+                where: { userId }
+            });
+            if (!user) {
+                throw new Error(`User with userId ${userId} not found`);
+            }
+        }
+        // Delete existing team assignments
+        yield prisma_1.default.userAssignedTeam.deleteMany({
+            where: { teamId: id }
+        });
+        // Create new team assignments
+        for (const userId of members) {
+            yield prisma_1.default.userAssignedTeam.create({
+                data: {
+                    userId,
+                    teamId: id,
+                }
+            });
+        }
+    }
+    // Update team name if provided
+    if (teamName) {
+        yield prisma_1.default.team.update({
+            where: { id },
+            data: { teamName }
+        });
+    }
+    // Return updated team with members
+    const result = yield prisma_1.default.team.findUnique({
+        where: { id },
+        include: {
+            members: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    });
+});
 exports.teamService = {
     createTeamIntoDB,
     deleteTeamFromDB,
-    getAllTeamsFromDB
+    getAllTeamsFromDB,
+    updateTeamInDB
 };

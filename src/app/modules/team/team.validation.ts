@@ -1,4 +1,4 @@
-import {z} from "zod";
+import { z } from "zod";
 
 const createTeamValidationSchema = z.object({
     body: z.object({
@@ -11,7 +11,15 @@ const createTeamValidationSchema = z.object({
     }),
 });
 
+const updateTeamValidationSchema = z.object({
+    body: z.object({
+        teamName: z.string().optional(),
+        members: z.array(z.string()).optional()
+    })
+})
+
 
 export const TeamValidation = {
-    createTeamValidationSchema
+    createTeamValidationSchema,
+    updateTeamValidationSchema
 }

@@ -16,4 +16,7 @@ router.get("/", team_controller_1.teamController.getAllTeams);
 router.delete("/:id", 
 // auth(UserRole.admin, UserRole.leader),
 team_controller_1.teamController.deleteTeam);
+router.patch("/:id", 
+// auth(UserRole.admin, UserRole.leader),
+(0, validateRequest_1.default)(team_validation_1.TeamValidation.updateTeamValidationSchema), team_controller_1.teamController.updateTeam);
 exports.teamRoutes = router;
