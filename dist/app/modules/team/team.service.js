@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.teamService = void 0;
 const prisma_1 = __importDefault(require("../../../lib/prisma"));
-// const prisma = new PrismaClient();
 //create a team
 const createTeamIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { teamName, members } = payload;
