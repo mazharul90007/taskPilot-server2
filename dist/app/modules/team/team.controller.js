@@ -49,8 +49,21 @@ const deleteTeam = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
         data: result
     });
 }));
+//update team
+const updateTeam = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const payload = req.body;
+    const result = yield team_service_1.teamService.updateTeamInDB(id, payload);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Team updated successfully",
+        data: result
+    });
+}));
 exports.teamController = {
     createTeam,
     deleteTeam,
-    getAllTeams
+    getAllTeams,
+    updateTeam
 };

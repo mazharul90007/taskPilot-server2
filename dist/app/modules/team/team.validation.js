@@ -12,6 +12,13 @@ const createTeamValidationSchema = zod_1.z.object({
         }),
     }),
 });
+const updateTeamValidationSchema = zod_1.z.object({
+    body: zod_1.z.object({
+        teamName: zod_1.z.string().optional(),
+        members: zod_1.z.array(zod_1.z.string()).optional()
+    })
+});
 exports.TeamValidation = {
-    createTeamValidationSchema
+    createTeamValidationSchema,
+    updateTeamValidationSchema
 };

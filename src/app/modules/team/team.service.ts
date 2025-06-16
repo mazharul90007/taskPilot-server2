@@ -1,4 +1,3 @@
-import { Team } from "@prisma/client";
 import prisma from "../../../lib/prisma"
 
 // const prisma = new PrismaClient();
@@ -84,8 +83,71 @@ const deleteTeamFromDB = async (id: string) => {
     return result;
 };
 
+//========Upsate a Team =========
+const updateTeamInDB = async (id: string, payload: { teamName?: string; members?: string[]; removeMember?: string }) => {
+    const { teamName, members, removeMember } = payload;
+
+    // If removing a single member
+    if (removeMember) {
+        await prisma.userAssignedTeam.deleteMany({
+            where: {
+                teamId: id,
+                userId: removeMember
+            }
+        });
+    }
+    // If updating the entire members list
+    else if (members) {
+        // Verify all users exist
+        for (const userId of members) {
+            const user = await prisma.user.findUnique({
+                where: { userId }
+            });
+            if (!user) {
+                throw new Error(`User with userId ${userId} not found`);
+            }
+        }
+
+        // Delete existing team assignments
+        await prisma.userAssignedTeam.deleteMany({
+            where: { teamId: id }
+        });
+
+        // Create new team assignments
+        for (const userId of members) {
+            await prisma.userAssignedTeam.create({
+                data: {
+                    userId,
+                    teamId: id,
+                }
+            });
+        }
+    }
+
+    // Update team name if provided
+    if (teamName) {
+        await prisma.team.update({
+            where: { id },
+            data: { teamName }
+        });
+    }
+
+    // Return updated team with members
+    const result = await prisma.team.findUnique({
+        where: { id },
+        include: {
+            members: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    })
+}
+
 export const teamService = {
     createTeamIntoDB,
     deleteTeamFromDB,
-    getAllTeamsFromDB
+    getAllTeamsFromDB,
+    updateTeamInDB
 }

@@ -43,8 +43,23 @@ const deleteTeam = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
+//update team
+const updateTeam = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const payload = req.body;
+    const result = await teamService.updateTeamInDB(id, payload);
+
+    sendResponse(res, {
+        statusCode: status.OK,
+        success: true,
+        message: "Team updated successfully",
+        data: result
+    })
+})
+
 export const teamController = {
     createTeam,
     deleteTeam,
-    getAllTeams
+    getAllTeams,
+    updateTeam
 }
