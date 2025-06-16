@@ -7,7 +7,14 @@ import status from 'http-status';
 
 
 const createCheckoutSession = catchAsync(async (req: Request, res: Response) => {
-  const origin = req.headers.origin || config.frontend_base_url || 'http://localhost:3000';
+//   const origin = req.headers.origin || config.frontend_base_url || 'https://task-pilot-client-eight.vercel.app';
+  const origin: string = config.frontend_base_url || 'https://task-pilot-client-eight.vercel.app';
+
+
+
+//   console.log(origin);
+
+
   const result = await paymentService.createCheckoutSession(req.body, origin);
 
   sendResponse(res, {

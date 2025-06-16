@@ -19,7 +19,9 @@ const config_1 = __importDefault(require("../../../config"));
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
 const createCheckoutSession = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const origin = req.headers.origin || config_1.default.frontend_base_url || 'http://localhost:3000';
+    //   const origin = req.headers.origin || config.frontend_base_url || 'https://task-pilot-client-eight.vercel.app';
+    const origin = config_1.default.frontend_base_url || 'https://task-pilot-client-eight.vercel.app';
+    //   console.log(origin);
     const result = yield payment_service_1.paymentService.createCheckoutSession(req.body, origin);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
