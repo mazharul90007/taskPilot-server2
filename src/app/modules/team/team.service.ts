@@ -67,6 +67,25 @@ const getAllTeamsFromDB = async () => {
     return result;
 }
 
+//=============Get single Team ==============
+const getSingleTeamFromDB = async (id: string) => {
+    const result = await prisma.team.findUnique({
+        where: { id },
+        include: {
+            members: {
+                include: {
+                    user: true
+                }
+            }
+        }
+    });
+    if (!result) {
+        throw new Error("Team not found")
+    }
+
+    return result;
+}
+
 //==================Delete a Team =================
 const deleteTeamFromDB = async (id: string) => {
     //first delete all team assignment
@@ -147,5 +166,6 @@ export const teamService = {
     createTeamIntoDB,
     deleteTeamFromDB,
     getAllTeamsFromDB,
-    updateTeamInDB
+    updateTeamInDB,
+    getSingleTeamFromDB
 }

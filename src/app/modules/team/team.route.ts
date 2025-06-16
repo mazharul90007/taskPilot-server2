@@ -15,6 +15,8 @@ router.post(
 
 router.get("/", teamController.getAllTeams)
 
+router.get("/:id", teamController.getSingleTeam)
+
 router.delete(
     "/:id",
     // auth(UserRole.admin, UserRole.leader),

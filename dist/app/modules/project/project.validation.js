@@ -34,6 +34,28 @@ const createProjectZodSchema = zod_1.z.object({
         note: zod_1.z.string().optional(),
     }),
 });
+//====================Project Update validation==================
+const updateProjectZodSchema = zod_1.z.object({
+    body: zod_1.z.object({
+        projectName: zod_1.z.string().optional(),
+        projectId: zod_1.z.string().optional(),
+        station: zod_1.z.string().optional(),
+        deadline: zod_1.z.string().optional(),
+        value: zod_1.z.number().optional(),
+        teamId: zod_1.z.string().optional(),
+        uiMemberIds: zod_1.z.array(zod_1.z.string()).optional(),
+        frontendMemberIds: zod_1.z.array(zod_1.z.string()).optional(),
+        backendMemberIds: zod_1.z.array(zod_1.z.string()).optional(),
+        estimateDelivery: zod_1.z.string().optional(),
+        projectStatus: zod_1.z.enum(['planning', 'in_progress', 'on_hold', 'completed', 'delivered', 'cancelled']).optional(),
+        clientStatus: zod_1.z.enum(['active', 'satisfied', 'follow_up', 'dissatisfied', 'inactive']).optional(),
+        figmaLink: zod_1.z.string().optional(),
+        liveLink: zod_1.z.string().optional(),
+        requirementsLink: zod_1.z.string().optional(),
+        note: zod_1.z.string().optional(),
+    }),
+});
 exports.ProjectValidation = {
     createProjectZodSchema,
+    updateProjectZodSchema
 };

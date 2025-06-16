@@ -33,6 +33,30 @@ const createProjectZodSchema = z.object({
     }),
 });
 
+//====================Project Update validation==================
+
+const updateProjectZodSchema = z.object({
+    body: z.object({
+        projectName: z.string().optional(),
+        projectId: z.string().optional(),
+        station: z.string().optional(),
+        deadline: z.string().optional(),
+        value: z.number().optional(),
+        teamId: z.string().optional(),
+        uiMemberIds: z.array(z.string()).optional(),
+        frontendMemberIds: z.array(z.string()).optional(),
+        backendMemberIds: z.array(z.string()).optional(),
+        estimateDelivery: z.string().optional(),
+        projectStatus: z.enum(['planning', 'in_progress', 'on_hold', 'completed', 'delivered', 'cancelled']).optional(),
+        clientStatus: z.enum(['active', 'satisfied', 'follow_up', 'dissatisfied', 'inactive']).optional(),
+        figmaLink: z.string().optional(),
+        liveLink: z.string().optional(),
+        requirementsLink: z.string().optional(),
+        note: z.string().optional(),
+    }),
+});
+
 export const ProjectValidation = {
     createProjectZodSchema,
+    updateProjectZodSchema
 };

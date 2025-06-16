@@ -17,6 +17,7 @@ const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
 const project_service_1 = require("./project.service");
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
+//===============create a Project===============
 const createProject = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const payload = req.body;
     const result = yield project_service_1.projectService.createProjectIntoDB(payload);
@@ -27,6 +28,54 @@ const createProject = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
         data: result
     });
 }));
+//==========get all Projects===========
+const getAllProjects = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield project_service_1.projectService.getAllProjectsfromDB();
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Projects retrieved successfully",
+        data: result
+    });
+}));
+//============get single Project ===========
+const getSingleProject = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield project_service_1.projectService.getSingleProjectFromDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Project retrieved successfully",
+        data: result
+    });
+}));
+//============update Project ==============
+const updateProject = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const payload = req.body;
+    const result = yield project_service_1.projectService.updateProjectInDB(id, payload);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Project updated Successfully",
+        data: result
+    });
+}));
+//===========delete a Project =============
+const deleteProject = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield project_service_1.projectService.deleteProjectFromDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Project deleted successfully",
+        data: result
+    });
+}));
 exports.projectController = {
     createProject,
+    getAllProjects,
+    updateProject,
+    deleteProject,
+    getSingleProject
 };
