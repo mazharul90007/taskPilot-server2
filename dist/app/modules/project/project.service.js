@@ -8,6 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -27,7 +38,6 @@ const createProjectIntoDB = (payload) => __awaiter(void 0, void 0, void 0, funct
             value,
             projectStatus: client_1.ProjectStatus.new,
             clientStatus: client_1.ClientStatus.active,
-            // Explicitly set other fields as null
             estimateDelivery: null,
             figmaLink: null,
             liveLink: null,
@@ -92,10 +102,15 @@ const getSingleProjectFromDB = (id) => __awaiter(void 0, void 0, void 0, functio
 });
 //=======================Update Project ====================
 const updateProjectInDB = (id, payload, userId, userRole) => __awaiter(void 0, void 0, void 0, function* () {
+    const { uiMemberIds, frontendMemberIds, backendMemberIds } = payload, otherFields = __rest(payload, ["uiMemberIds", "frontendMemberIds", "backendMemberIds"]);
     // First get the project to check team ownership
     const project = yield prisma_1.default.project.findUnique({
         where: { id },
-        include: { team: true }
+        include: {
+            team: {
+                include: { members: true }
+            }
+        }
     });
     if (!project) {
         throw new Error("Project not found");
@@ -122,10 +137,70 @@ const updateProjectInDB = (id, payload, userId, userRole) => __awaiter(void 0, v
             throw new Error("You are not authorized to update projects");
         }
     }
-    // If authorization passes, proceed with update
+    // If team is assigned, verify all member IDs belong to the team
+    if (project.teamId && project.team) { // Check both teamId and team
+        const teamMemberIds = project.team.members.map(member => member.userId);
+        // Check UI members
+        if (uiMemberIds) {
+            for (const memberId of uiMemberIds) {
+                if (!teamMemberIds.includes(memberId)) {
+                    throw new Error(`User ${memberId} is not a member of this team`);
+                }
+            }
+        }
+        // Check Frontend members
+        if (frontendMemberIds) {
+            for (const memberId of frontendMemberIds) {
+                if (!teamMemberIds.includes(memberId)) {
+                    throw new Error(`User ${memberId} is not a member of this team`);
+                }
+            }
+        }
+        // Check Backend members
+        if (backendMemberIds) {
+            for (const memberId of backendMemberIds) {
+                if (!teamMemberIds.includes(memberId)) {
+                    throw new Error(`User ${memberId} is not a member of this team`);
+                }
+            }
+        }
+    }
+    // Update project with member assignments
     const result = yield prisma_1.default.project.update({
         where: { id },
-        data: Object.assign(Object.assign({}, payload), { teamId: payload.teamId === null ? null : payload.teamId }),
+        data: Object.assign(Object.assign({}, otherFields), { 
+            // Update UI members
+            uiMembers: uiMemberIds ? {
+                deleteMany: {},
+                create: uiMemberIds.map(userId => ({
+                    userId
+                }))
+            } : undefined, 
+            // Update Frontend members
+            frontendMembers: frontendMemberIds ? {
+                deleteMany: {},
+                create: frontendMemberIds.map(userId => ({
+                    userId
+                }))
+            } : undefined, 
+            // Update Backend members
+            backendMembers: backendMemberIds ? {
+                deleteMany: {},
+                create: backendMemberIds.map(userId => ({
+                    userId
+                }))
+            } : undefined }),
+        include: {
+            uiMembers: {
+                include: { user: true }
+            },
+            frontendMembers: {
+                include: { user: true }
+            },
+            backendMembers: {
+                include: { user: true }
+            }
+        }
     });
     return result;
 });
