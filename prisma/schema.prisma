@@ -156,5 +156,6 @@ enum ClientStatus {
 enum UserRole {
   admin
   leader
+  coleader
   member
 }
