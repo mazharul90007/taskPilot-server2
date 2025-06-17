@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { JwtUtils } from "../modules/auth/auth.utils";
 import config from "../../config";
 
-const auth = (...roles: UserRole[]) => {
+const auth = (...role: UserRole[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             const token = req.headers.authorization?.split(" ")[1];
@@ -17,7 +17,7 @@ const auth = (...roles: UserRole[]) => {
                 config.jwt_access_secret as string
             );
 
-            if (!roles.includes(decoded.role as UserRole)) {
+            if (!role.includes(decoded.role as UserRole)) {
                 throw new Error("Your are not authorized");
             }
 

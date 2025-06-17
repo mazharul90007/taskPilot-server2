@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const auth_utils_1 = require("../modules/auth/auth.utils");
 const config_1 = __importDefault(require("../../config"));
-const auth = (...roles) => {
+const auth = (...role) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         try {
@@ -23,7 +23,7 @@ const auth = (...roles) => {
                 throw new Error("Your are not authorized");
             }
             const decoded = auth_utils_1.JwtUtils.verifyToken(token, config_1.default.jwt_access_secret);
-            if (!roles.includes(decoded.role)) {
+            if (!role.includes(decoded.role)) {
                 throw new Error("Your are not authorized");
             }
             req.user = decoded;
