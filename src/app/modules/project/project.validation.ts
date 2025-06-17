@@ -18,14 +18,12 @@ const createProjectZodSchema = z.object({
             required_error: "Value is required",
         }),
         teamId: z.string().optional(),
-        uiMemberIds: z.array(z.string()).optional(),  // Changed to array
-        frontendMemberIds: z.array(z.string()).optional(),  // Changed to array
-        backendMemberIds: z.array(z.string()).optional(),  // Changed to array
-        estimateDelivery: z.string({
-            required_error: "Estimated delivery is required",
-        }),
-        projectStatus: z.enum(['planning', 'in_progress', 'on_hold', 'completed', 'delivered', 'cancelled']).optional(),
-        clientStatus: z.enum(['active', 'satisfied', 'follow_up', 'dissatisfied', 'inactive']).optional(),
+        uiMemberIds: z.array(z.string()).optional(),
+        frontendMemberIds: z.array(z.string()).optional(),
+        backendMemberIds: z.array(z.string()).optional(),
+        estimateDelivery: z.string().optional(),
+        projectStatus: z.enum(['new', 'ui_ux', 'wip', 'qa', 'delivered', 'revision', 'cancelled']).default('new'),
+        clientStatus: z.enum(['active', 'satisfied', 'neutral', 'dissatisfied', 'inactive']).default('active'),
         figmaLink: z.string().optional(),
         liveLink: z.string().optional(),
         requirementsLink: z.string().optional(),
@@ -47,8 +45,8 @@ const updateProjectZodSchema = z.object({
         frontendMemberIds: z.array(z.string()).optional(),
         backendMemberIds: z.array(z.string()).optional(),
         estimateDelivery: z.string().optional(),
-        projectStatus: z.enum(['planning', 'in_progress', 'on_hold', 'completed', 'delivered', 'cancelled']).optional(),
-        clientStatus: z.enum(['active', 'satisfied', 'follow_up', 'dissatisfied', 'inactive']).optional(),
+        projectStatus: z.enum(['new', 'ui_ux', 'wip', 'qa', 'delivered', 'revision', 'cancelled']).optional(),
+        clientStatus: z.enum(['active', 'satisfied', 'neutral', 'dissatisfied', 'inactive']).optional(),
         figmaLink: z.string().optional(),
         liveLink: z.string().optional(),
         requirementsLink: z.string().optional(),

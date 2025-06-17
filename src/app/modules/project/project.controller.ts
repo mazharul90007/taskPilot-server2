@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { Request, Response, RequestHandler } from "express";
 import catchAsync from "../../../shared/catchAsync";
 import { projectService } from "./project.service";
 import sendResponse from "../../../shared/sendResponse";
 import status from "http-status";
 
 //===============create a Project===============
-const createProject = catchAsync(async (req: Request, res: Response) => {
+const createProject: RequestHandler = catchAsync(async (req: Request, res: Response): Promise<void> => {
     const payload = req.body;
     const result = await projectService.createProjectIntoDB(payload);
 
@@ -14,11 +14,11 @@ const createProject = catchAsync(async (req: Request, res: Response) => {
         success: true,
         message: 'Project created Successfully',
         data: result
-    })
-})
+    });
+});
 
 //==========get all Projects===========
-const getAllProjects = catchAsync(async (req: Request, res: Response) => {
+const getAllProjects: RequestHandler = catchAsync(async (req: Request, res: Response): Promise<void> => {
     const result = await projectService.getAllProjectsfromDB();
 
     sendResponse(res, {
@@ -26,11 +26,11 @@ const getAllProjects = catchAsync(async (req: Request, res: Response) => {
         success: true,
         message: "Projects retrieved successfully",
         data: result
-    })
-})
+    });
+});
 
 //============get single Project ===========
-const getSingleProject = catchAsync(async (req: Request, res: Response) => {
+const getSingleProject: RequestHandler = catchAsync(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const result = await projectService.getSingleProjectFromDB(id);
 
@@ -39,11 +39,11 @@ const getSingleProject = catchAsync(async (req: Request, res: Response) => {
         success: true,
         message: "Project retrieved successfully",
         data: result
-    })
-})
+    });
+});
 
 //============update Project ==============
-const updateProject = catchAsync(async (req: Request, res: Response) => {
+const updateProject: RequestHandler = catchAsync(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const payload = req.body;
     const result = await projectService.updateProjectInDB(id, payload);
@@ -53,11 +53,11 @@ const updateProject = catchAsync(async (req: Request, res: Response) => {
         success: true,
         message: "Project updated Successfully",
         data: result
-    })
-})
+    });
+});
 
 //===========delete a Project =============
-const deleteProject = catchAsync(async (req: Request, res: Response) => {
+const deleteProject: RequestHandler = catchAsync(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const result = await projectService.deleteProjectFromDB(id);
 
@@ -66,8 +66,8 @@ const deleteProject = catchAsync(async (req: Request, res: Response) => {
         success: true,
         message: "Project deleted successfully",
         data: result
-    })
-})
+    });
+});
 
 export const projectController = {
     createProject,
@@ -75,4 +75,4 @@ export const projectController = {
     updateProject,
     deleteProject,
     getSingleProject
-}
+};

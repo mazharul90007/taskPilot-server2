@@ -32,6 +32,11 @@ const userValidationSchema = zod_1.z.object({
             required_error: "Role is required",
             invalid_type_error: "Role must be one of admin, leader, member",
         }),
+        image: zod_1.z
+            .string({
+            invalid_type_error: "Image must be a string",
+        })
+            .optional(),
         isActive: zod_1.z.boolean().optional(),
     }),
 });

@@ -38,6 +38,7 @@ const loginUser = async (userId: string, password: string) => {
       userName: user.userName,
       email: user.email,
       role: user.role,
+      image: user.image,
     },
     token,
   };

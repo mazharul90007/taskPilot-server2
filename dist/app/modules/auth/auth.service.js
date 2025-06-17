@@ -42,6 +42,7 @@ const loginUser = (userId, password) => __awaiter(void 0, void 0, void 0, functi
             userName: user.userName,
             email: user.email,
             role: user.role,
+            image: user.image,
         },
         token,
     };

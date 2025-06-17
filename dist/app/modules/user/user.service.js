@@ -18,7 +18,7 @@ const prisma_1 = __importDefault(require("../../../lib/prisma"));
 // const prisma = new PrismaClient();
 // Create user
 const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, userName, email, password, role } = payload;
+    const { userId, userName, email, password, role, image } = payload;
     if (!userId || !userName || !email || !password || !role) {
         throw new Error("Missing required user fields");
     }
@@ -30,6 +30,7 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
             email,
             password: hashedPassword,
             role,
+            image,
         },
         select: {
             id: true,
@@ -37,6 +38,7 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
             userName: true,
             email: true,
             role: true,
+            image: true,
             isActive: true,
             createdAt: true,
             updatedAt: true,
