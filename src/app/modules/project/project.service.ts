@@ -3,7 +3,7 @@ import { ProjectStatus, ClientStatus, UserRole } from "@prisma/client";
 
 const createProjectIntoDB = async (payload: any) => {
     const { projectName, projectId, station, deadline, value } = payload;
-    
+
     // Create project with only required fields and default statuses
     const result = await prisma.project.create({
         data: {
@@ -14,7 +14,6 @@ const createProjectIntoDB = async (payload: any) => {
             value,
             projectStatus: ProjectStatus.new,
             clientStatus: ClientStatus.active,
-            // Explicitly set other fields as null
             estimateDelivery: null,
             figmaLink: null,
             liveLink: null,
@@ -53,7 +52,7 @@ const getAllProjectsfromDB = async () => {
 }
 
 //=====================get a single Project ================
-const getSingleProjectFromDB = async (id: string)=>{
+const getSingleProjectFromDB = async (id: string) => {
     const result = await prisma.project.findUnique({
         where: { id },
         include: {
@@ -75,18 +74,35 @@ const getSingleProjectFromDB = async (id: string)=>{
             }
         }
     });
-    if(!result){
-        throw new Error ('Project not found');
+    if (!result) {
+        throw new Error('Project not found');
     }
     return result;
 }
 
 //=======================Update Project ====================
-const updateProjectInDB = async (id: string, payload: any, userId: string, userRole: UserRole) => {
+const updateProjectInDB = async (id: string, payload: {
+    uiMemberIds?: string[];
+    frontendMemberIds?: string[];
+    backendMemberIds?: string[];
+    teamId?: string | null;
+    [key: string]: any;
+}, userId: string, userRole: UserRole) => {
+    const {
+        uiMemberIds,
+        frontendMemberIds,
+        backendMemberIds,
+        ...otherFields
+    } = payload;
+
     // First get the project to check team ownership
     const project = await prisma.project.findUnique({
         where: { id },
-        include: { team: true }
+        include: {
+            team: {
+                include: { members: true }
+            }
+        }
     });
 
     if (!project) {
@@ -103,9 +119,9 @@ const updateProjectInDB = async (id: string, payload: any, userId: string, userR
             }
 
             const userTeam = await prisma.userAssignedTeam.findFirst({
-                where: { 
+                where: {
                     userId: userId,
-                    teamId: project.teamId 
+                    teamId: project.teamId
                 }
             });
 
@@ -117,13 +133,76 @@ const updateProjectInDB = async (id: string, payload: any, userId: string, userR
         }
     }
 
-    // If authorization passes, proceed with update
+    // If team is assigned, verify all member IDs belong to the team
+    if (project.teamId && project.team) {  // Check both teamId and team
+        const teamMemberIds = project.team.members.map(member => member.userId);
+
+        // Check UI members
+        if (uiMemberIds) {
+            for (const memberId of uiMemberIds) {
+                if (!teamMemberIds.includes(memberId)) {
+                    throw new Error(`User ${memberId} is not a member of this team`);
+                }
+            }
+        }
+
+        // Check Frontend members
+        if (frontendMemberIds) {
+            for (const memberId of frontendMemberIds) {
+                if (!teamMemberIds.includes(memberId)) {
+                    throw new Error(`User ${memberId} is not a member of this team`);
+                }
+            }
+        }
+
+        // Check Backend members
+        if (backendMemberIds) {
+            for (const memberId of backendMemberIds) {
+                if (!teamMemberIds.includes(memberId)) {
+                    throw new Error(`User ${memberId} is not a member of this team`);
+                }
+            }
+        }
+    }
+
+    // Update project with member assignments
     const result = await prisma.project.update({
         where: { id },
         data: {
-            ...payload,
-            teamId: payload.teamId === null ? null : payload.teamId
+            ...otherFields,
+            // Update UI members
+            uiMembers: uiMemberIds ? {
+                deleteMany: {},
+                create: uiMemberIds.map(userId => ({
+                    userId
+                }))
+            } : undefined,
+            // Update Frontend members
+            frontendMembers: frontendMemberIds ? {
+                deleteMany: {},
+                create: frontendMemberIds.map(userId => ({
+                    userId
+                }))
+            } : undefined,
+            // Update Backend members
+            backendMembers: backendMemberIds ? {
+                deleteMany: {},
+                create: backendMemberIds.map(userId => ({
+                    userId
+                }))
+            } : undefined
         },
+        include: {
+            uiMembers: {
+                include: { user: true }
+            },
+            frontendMembers: {
+                include: { user: true }
+            },
+            backendMembers: {
+                include: { user: true }
+            }
+        }
     });
 
     return result;
