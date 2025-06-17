@@ -5,29 +5,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-// import router from './app/routes';
-// import httpStatus from 'http-status';
-// import globalErrorHandler from './app/middlewares/globalErrorHandler';
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const globalErrorHandler_1 = __importDefault(require("./app/middlewares/globalErrorHandler"));
 const routes_1 = __importDefault(require("./app/routes"));
 const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
-// import router from './app/routes';
+const config_1 = __importDefault(require("./config"));
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
-// app.use(cors({ origin: "http://localhost:3000" }));
+app.use((0, cors_1.default)({
+    origin: config_1.default.frontend_base_url,
+    credentials: true
+}));
 app.use((0, cookie_parser_1.default)());
-//parser
+// parser
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
+// Simple health check route
 app.get('/', (req, res) => {
     res.send({
         Message: "taskPilot-server server is running .."
     });
 });
+// API routes
 app.use('/api/v1', routes_1.default);
-// global error handeling
+// global error handling
 app.use(globalErrorHandler_1.default);
-//Not Found
+// Not Found
 app.use(notFound_1.default);
 exports.default = app;
