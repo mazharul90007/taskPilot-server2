@@ -20,14 +20,12 @@ const createProjectZodSchema = zod_1.z.object({
             required_error: "Value is required",
         }),
         teamId: zod_1.z.string().optional(),
-        uiMemberIds: zod_1.z.array(zod_1.z.string()).optional(), // Changed to array
-        frontendMemberIds: zod_1.z.array(zod_1.z.string()).optional(), // Changed to array
-        backendMemberIds: zod_1.z.array(zod_1.z.string()).optional(), // Changed to array
-        estimateDelivery: zod_1.z.string({
-            required_error: "Estimated delivery is required",
-        }),
-        projectStatus: zod_1.z.enum(['planning', 'in_progress', 'on_hold', 'completed', 'delivered', 'cancelled']).optional(),
-        clientStatus: zod_1.z.enum(['active', 'satisfied', 'follow_up', 'dissatisfied', 'inactive']).optional(),
+        uiMemberIds: zod_1.z.array(zod_1.z.string()).optional(),
+        frontendMemberIds: zod_1.z.array(zod_1.z.string()).optional(),
+        backendMemberIds: zod_1.z.array(zod_1.z.string()).optional(),
+        estimateDelivery: zod_1.z.string().optional(),
+        projectStatus: zod_1.z.enum(['new', 'ui_ux', 'wip', 'qa', 'delivered', 'revision', 'cancelled']).default('new'),
+        clientStatus: zod_1.z.enum(['active', 'satisfied', 'neutral', 'dissatisfied', 'inactive']).default('active'),
         figmaLink: zod_1.z.string().optional(),
         liveLink: zod_1.z.string().optional(),
         requirementsLink: zod_1.z.string().optional(),
@@ -47,8 +45,8 @@ const updateProjectZodSchema = zod_1.z.object({
         frontendMemberIds: zod_1.z.array(zod_1.z.string()).optional(),
         backendMemberIds: zod_1.z.array(zod_1.z.string()).optional(),
         estimateDelivery: zod_1.z.string().optional(),
-        projectStatus: zod_1.z.enum(['planning', 'in_progress', 'on_hold', 'completed', 'delivered', 'cancelled']).optional(),
-        clientStatus: zod_1.z.enum(['active', 'satisfied', 'follow_up', 'dissatisfied', 'inactive']).optional(),
+        projectStatus: zod_1.z.enum(['new', 'ui_ux', 'wip', 'qa', 'delivered', 'revision', 'cancelled']).optional(),
+        clientStatus: zod_1.z.enum(['active', 'satisfied', 'neutral', 'dissatisfied', 'inactive']).optional(),
         figmaLink: zod_1.z.string().optional(),
         liveLink: zod_1.z.string().optional(),
         requirementsLink: zod_1.z.string().optional(),

@@ -6,7 +6,7 @@ import prisma from "../../../lib/prisma";
 
 // Create user
 const createUserIntoDB = async (payload: Partial<User>) => {
-  const { userId, userName, email, password, role } = payload;
+  const { userId, userName, email, password, role, image } = payload;
 
   if (!userId || !userName || !email || !password || !role) {
     throw new Error("Missing required user fields");
@@ -21,6 +21,7 @@ const createUserIntoDB = async (payload: Partial<User>) => {
       email,
       password: hashedPassword,
       role,
+      image,
     },
     select: {
       id: true,
@@ -28,6 +29,7 @@ const createUserIntoDB = async (payload: Partial<User>) => {
       userName: true,
       email: true,
       role: true,
+      image: true,
       isActive: true,
       createdAt: true,
       updatedAt: true,

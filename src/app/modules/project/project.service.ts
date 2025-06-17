@@ -1,94 +1,31 @@
 import prisma from "../../../lib/prisma"
+import { ProjectStatus, ClientStatus } from "@prisma/client";
 
-const createProjectIntoDB = async (payload: {
-    projectName: string;
-    projectId: string;
-    station: string;
-    deadline: Date;
-    value: number;
-    teamId?: string;
-    uiMemberIds?: string[];
-    frontendMemberIds?: string[];
-    backendMemberIds?: string[];
-    estimateDelivery: string;
-    projectStatus?: 'planning' | 'in_progress' | 'on_hold' | 'completed' | 'delivered' | 'cancelled';
-    clientStatus?: 'active' | 'satisfied' | 'follow_up' | 'dissatisfied' | 'inactive';
-    figmaLink?: string;
-    liveLink?: string;
-    requirementsLink?: string;
-    note?: string;
-}) => {
-    const { uiMemberIds, frontendMemberIds, backendMemberIds, ...projectData } = payload;
-
-    // Create project with basic data
-    const project = await prisma.project.create({
+const createProjectIntoDB = async (payload: any) => {
+    const { projectName, projectId, station, deadline, value } = payload;
+    
+    // Create project with only required fields and default statuses
+    const result = await prisma.project.create({
         data: {
-            ...projectData,
-            deadline: new Date(projectData.deadline)
-        }
-    });
-
-    // Add UI members if provided
-    if (uiMemberIds?.length) {
-        for (const userId of uiMemberIds) {
-            await prisma.projectUIMember.create({
-                data: {
-                    projectId: project.id,
-                    userId
-                }
-            });
-        }
-    }
-
-    // Add Frontend members if provided
-    if (frontendMemberIds?.length) {
-        for (const userId of frontendMemberIds) {
-            await prisma.projectFrontendMember.create({
-                data: {
-                    projectId: project.id,
-                    userId
-                }
-            });
-        }
-    }
-
-    // Add Backend members if provided
-    if (backendMemberIds?.length) {
-        for (const userId of backendMemberIds) {
-            await prisma.projectBackendMember.create({
-                data: {
-                    projectId: project.id,
-                    userId
-                }
-            });
-        }
-    }
-
-    // Return project with all relations
-    const result = await prisma.project.findUnique({
-        where: { id: project.id },
-        include: {
-            team: true,
-            uiMembers: {
-                include: {
-                    user: true
-                }
-            },
-            frontendMembers: {
-                include: {
-                    user: true
-                }
-            },
-            backendMembers: {
-                include: {
-                    user: true
-                }
-            }
-        }
+            projectName,
+            projectId,
+            station,
+            deadline: new Date(deadline),
+            value,
+            projectStatus: ProjectStatus.new,
+            clientStatus: ClientStatus.active,
+            // Explicitly set other fields as null
+            estimateDelivery: null,
+            figmaLink: null,
+            liveLink: null,
+            requirementsLink: null,
+            note: null,
+            teamId: null
+        },
     });
 
     return result;
-}
+};
 
 //==============================get all project============
 const getAllProjectsfromDB = async () => {
@@ -145,111 +82,20 @@ const getSingleProjectFromDB = async (id: string)=>{
 }
 
 //=======================Update Project ====================
-const updateProjectInDB = async (id: string, payload: {
-    projectName?: string;
-    projectId?: string;
-    station?: string;
-    deadline?: Date;
-    value?: number;
-    teamId?: string;
-    uiMemberIds?: string[];
-    frontendMemberIds?: string[];
-    backendMemberIds?: string[];
-    estimateDelivery?: string;
-    projectStatus?: 'planning' | 'in_progress' | 'on_hold' | 'completed' | 'delivered' | 'cancelled';
-    clientStatus?: 'active' | 'satisfied' | 'follow_up' | 'dissatisfied' | 'inactive';
-    figmaLink?: string;
-    liveLink?: string;
-    requirementsLink?: string;
-    note?: string;
-}) => {
-    const { uiMemberIds, frontendMemberIds, backendMemberIds, ...projectData } = payload;
+const updateProjectInDB = async (id: string, payload: any) => {
+    const isExist = await prisma.project.findUnique({ where: { id } });
+    if (!isExist) {
+        throw new Error("Project not found");
+    }
 
-    // Update basic project data
-    await prisma.project.update({
+    // Update project with any provided fields
+    const result = await prisma.project.update({
         where: { id },
-        data: {
-            ...projectData,
-            deadline: projectData.deadline ? new Date(projectData.deadline) : undefined
-        }
-    });
-
-    // Update UI members if provided
-    if (uiMemberIds) {
-        // Delete existing UI members
-        await prisma.projectUIMember.deleteMany({
-            where: { projectId: id }
-        });
-        // Add new UI members
-        for (const userId of uiMemberIds) {
-            await prisma.projectUIMember.create({
-                data: {
-                    projectId: id,
-                    userId
-                }
-            });
-        }
-    }
-
-    // Update Frontend members if provided
-    if (frontendMemberIds) {
-        // Delete existing Frontend members
-        await prisma.projectFrontendMember.deleteMany({
-            where: { projectId: id }
-        });
-        // Add new Frontend members
-        for (const userId of frontendMemberIds) {
-            await prisma.projectFrontendMember.create({
-                data: {
-                    projectId: id,
-                    userId
-                }
-            });
-        }
-    }
-
-    // Update Backend members if provided
-    if (backendMemberIds) {
-        // Delete existing Backend members
-        await prisma.projectBackendMember.deleteMany({
-            where: { projectId: id }
-        });
-        // Add new Backend members
-        for (const userId of backendMemberIds) {
-            await prisma.projectBackendMember.create({
-                data: {
-                    projectId: id,
-                    userId
-                }
-            });
-        }
-    }
-
-    // Return updated project with all relations
-    const result = await prisma.project.findUnique({
-        where: { id },
-        include: {
-            team: true,
-            uiMembers: {
-                include: {
-                    user: true
-                }
-            },
-            frontendMembers: {
-                include: {
-                    user: true
-                }
-            },
-            backendMembers: {
-                include: {
-                    user: true
-                }
-            }
-        }
+        data: payload,
     });
 
     return result;
-}
+};
 
 //=====================delete a Project =============
 const deleteProjectFromDB = async (id: string) => {
