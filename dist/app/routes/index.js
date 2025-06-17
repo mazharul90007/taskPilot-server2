@@ -9,6 +9,7 @@ const auth_route_1 = require("../modules/auth/auth.route");
 const team_route_1 = require("../modules/team/team.route");
 const payment_route_1 = require("../modules/payment/payment.route");
 const project_route_1 = require("../modules/project/project.route");
+const chat_route_1 = require("../modules/chat/chat.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
     {
@@ -30,6 +31,10 @@ const moduleRoutes = [
     {
         path: "/project",
         route: project_route_1.projectRoutes,
+    },
+    {
+        path: "/chat",
+        route: chat_route_1.chatRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

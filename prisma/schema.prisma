@@ -24,6 +24,8 @@ model User {
   frontendProjects ProjectFrontendMember[]
   backendProjects  ProjectBackendMember[]
   payments         Payment[]
+  chatRooms        ChatRoomParticipant[]
+  messages         Message[]               @relation("UserMessages")
 }
 
 model Team {
@@ -33,6 +35,7 @@ model Team {
   projects  Project[]          @relation("TeamProjects")
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
+  chatRooms ChatRoom[]         @relation("TeamChatRooms")
 }
 
 model UserAssignedTeam {
@@ -71,6 +74,7 @@ model Project {
   uiMembers        ProjectUIMember[]
   frontendMembers  ProjectFrontendMember[]
   backendMembers   ProjectBackendMember[]
+  chatRooms        ChatRoom[]              @relation("ProjectChatRooms")
 }
 
 model ProjectUIMember {
@@ -132,6 +136,44 @@ model Payment {
   //  Relation to User
   userId String @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
+}
+
+model ChatRoom {
+  id           String                @id @default(auto()) @map("_id") @db.ObjectId
+  name         String?
+  participants ChatRoomParticipant[]
+  messages     Message[]
+  projectId    String?               @db.ObjectId
+  project      Project?              @relation(fields: [projectId], references: [id], name: "ProjectChatRooms")
+  teamId       String?               @db.ObjectId
+  team         Team?                 @relation(fields: [teamId], references: [id], name: "TeamChatRooms")
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+}
+
+model ChatRoomParticipant {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  chatRoomId String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, chatRoomId])
+  @@index([userId])
+  @@index([chatRoomId])
+}
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  roomId    String   @db.ObjectId
+  senderId  String   @db.ObjectId
+  sender    User     @relation(fields: [senderId], references: [id], name: "UserMessages") // Named relation
+  room      ChatRoom @relation(fields: [roomId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum ProjectStatus {
