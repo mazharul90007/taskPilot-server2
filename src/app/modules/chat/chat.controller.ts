@@ -96,9 +96,9 @@ const addParticipant = catchAsync(async (req: Request, res: Response) => {
 
   const result = await chatService.addParticipantToRoom(roomId, userId);
 
-  // Notify room about new participant via Socket.IO
-  const io: SocketServer = req.app.get("io");
-  io.to(`chat_${roomId}`).emit("participantAdded", result);
+  // Safely access Socket.IO
+  const io: SocketServer = req.app.get('io');
+  io?.to(`chat_${roomId}`).emit('participantAdded', result);
 
   sendResponse(res, {
     statusCode: status.OK,
