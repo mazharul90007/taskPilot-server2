@@ -20,29 +20,44 @@ const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
 const createCheckoutSession = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //   const origin = req.headers.origin || config.frontend_base_url || 'https://task-pilot-client-eight.vercel.app';
-    const origin = config_1.default.frontend_base_url || 'https://task-pilot-client-eight.vercel.app';
+    const origin = config_1.default.frontend_base_url || "https://task-pilot-client-eight.vercel.app";
     //   console.log(origin);
     const result = yield payment_service_1.paymentService.createCheckoutSession(req.body, origin);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Stripe checkout session created successfully',
+        message: "Stripe checkout session created successfully",
         data: result,
     });
 }));
 const confirmPayment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const sessionId = req.query.session_id;
     if (!sessionId)
-        throw new Error('Session ID is required');
+        throw new Error("Session ID is required");
     const result = yield payment_service_1.paymentService.confirmPaymentAndSave(sessionId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Payment confirmed and saved successfully',
+        message: "Payment confirmed and saved successfully",
         data: result,
+    });
+}));
+// Get payment data of a user
+const getPaymentsByUserId = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.params.userId;
+    if (!userId) {
+        throw new Error("User ID is required");
+    }
+    const payments = yield payment_service_1.paymentService.getPaymentsByUserId(userId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Payments fetched successfully",
+        data: payments,
     });
 }));
 exports.paymentController = {
     createCheckoutSession,
     confirmPayment,
+    getPaymentsByUserId,
 };

@@ -18,21 +18,21 @@ const client_1 = require("@prisma/client");
 const config_1 = __importDefault(require("../../../config"));
 const prisma = new client_1.PrismaClient();
 const stripe = new stripe_1.default(config_1.default.stripe_secret_key, {
-    apiVersion: '2023-10-16',
+    apiVersion: "2023-10-16",
 });
 const createCheckoutSession = (payload, origin) => __awaiter(void 0, void 0, void 0, function* () {
     const { productName, amount, userId } = payload;
     if (!productName || !amount || !userId) {
-        throw new Error('Product name, amount, and userId are required');
+        throw new Error("Product name, amount, and userId are required");
     }
     const session = yield stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        mode: 'payment',
+        payment_method_types: ["card"],
+        mode: "payment",
         metadata: { userId, productName, amount: amount.toString() },
         line_items: [
             {
                 price_data: {
-                    currency: 'usd',
+                    currency: "usd",
                     product_data: { name: productName },
                     unit_amount: amount,
                 },
@@ -46,25 +46,39 @@ const createCheckoutSession = (payload, origin) => __awaiter(void 0, void 0, voi
 });
 const confirmPaymentAndSave = (sessionId) => __awaiter(void 0, void 0, void 0, function* () {
     const session = yield stripe.checkout.sessions.retrieve(sessionId);
-    if (session.payment_status !== 'paid') {
-        throw new Error('Payment not successful');
+    if (session.payment_status !== "paid") {
+        throw new Error("Payment not successful");
     }
     const { userId, productName, amount } = session.metadata || {};
     if (!userId || !productName || !amount) {
-        throw new Error('Missing metadata');
+        throw new Error("Missing metadata");
     }
     const saved = yield prisma.payment.create({
         data: {
             stripeSessionId: sessionId,
             productName,
             amount: Number(amount),
-            status: 'paid',
+            status: "paid",
             userId,
         },
     });
     return saved;
 });
+// Get user payment data
+const getPaymentsByUserId = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const payments = yield prisma.payment.findMany({
+        where: {
+            userId,
+        },
+        orderBy: {
+            // optional: latest first
+            createdAt: "desc",
+        },
+    });
+    return payments;
+});
 exports.paymentService = {
     createCheckoutSession,
     confirmPaymentAndSave,
+    getPaymentsByUserId,
 };

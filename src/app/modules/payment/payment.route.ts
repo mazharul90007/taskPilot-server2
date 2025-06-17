@@ -5,5 +5,7 @@ const router = express.Router();
 
 router.post('/create-checkout-session', paymentController.createCheckoutSession);
 router.get('/confirm', paymentController.confirmPayment);
+router.get('/:userId', paymentController.getPaymentsByUserId);
+
 
 export const paymentRoutes = router;

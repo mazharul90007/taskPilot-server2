@@ -1,11 +1,11 @@
-import Stripe from 'stripe';
-import { PrismaClient } from '@prisma/client';
-import config from '../../../config';
+import Stripe from "stripe";
+import { PrismaClient } from "@prisma/client";
+import config from "../../../config";
 
 const prisma = new PrismaClient();
 
 const stripe = new Stripe(config.stripe_secret_key as string, {
-  apiVersion: '2023-10-16' as Stripe.LatestApiVersion,
+  apiVersion: "2023-10-16" as Stripe.LatestApiVersion,
 });
 
 interface IPaymentPayload {
@@ -20,17 +20,17 @@ const createCheckoutSession = async (
 ) => {
   const { productName, amount, userId } = payload;
   if (!productName || !amount || !userId) {
-    throw new Error('Product name, amount, and userId are required');
+    throw new Error("Product name, amount, and userId are required");
   }
 
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    mode: 'payment',
+    payment_method_types: ["card"],
+    mode: "payment",
     metadata: { userId, productName, amount: amount.toString() },
     line_items: [
       {
         price_data: {
-          currency: 'usd',
+          currency: "usd",
           product_data: { name: productName },
           unit_amount: amount,
         },
@@ -47,13 +47,13 @@ const createCheckoutSession = async (
 const confirmPaymentAndSave = async (sessionId: string) => {
   const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-  if (session.payment_status !== 'paid') {
-    throw new Error('Payment not successful');
+  if (session.payment_status !== "paid") {
+    throw new Error("Payment not successful");
   }
 
   const { userId, productName, amount } = session.metadata || {};
   if (!userId || !productName || !amount) {
-    throw new Error('Missing metadata');
+    throw new Error("Missing metadata");
   }
 
   const saved = await prisma.payment.create({
@@ -61,7 +61,7 @@ const confirmPaymentAndSave = async (sessionId: string) => {
       stripeSessionId: sessionId,
       productName,
       amount: Number(amount),
-      status: 'paid',
+      status: "paid",
       userId,
     },
   });
@@ -69,7 +69,23 @@ const confirmPaymentAndSave = async (sessionId: string) => {
   return saved;
 };
 
+// Get user payment data
+const getPaymentsByUserId = async (userId: string) => {
+  const payments = await prisma.payment.findMany({
+    where: {
+      userId,
+    },
+    orderBy: {
+       // optional: latest first
+      createdAt: "desc",
+    },
+  });
+
+  return payments;
+};
+
 export const paymentService = {
   createCheckoutSession,
   confirmPaymentAndSave,
+  getPaymentsByUserId,
 };
