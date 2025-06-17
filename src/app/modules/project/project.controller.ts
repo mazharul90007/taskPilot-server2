@@ -43,10 +43,17 @@ const getSingleProject: RequestHandler = catchAsync(async (req: Request, res: Re
 });
 
 //============update Project ==============
-const updateProject: RequestHandler = catchAsync(async (req: Request, res: Response): Promise<void> => {
+const updateProject = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const payload = req.body;
-    const result = await projectService.updateProjectInDB(id, payload);
+    const userId = req.user?.userId;
+    const userRole = req.user?.role;
+
+    if (!userId || !userRole) {
+        throw new Error("User information not found");
+    }
+
+    const result = await projectService.updateProjectInDB(id, payload, userId, userRole);
 
     sendResponse(res, {
         statusCode: status.OK,

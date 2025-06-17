@@ -5,13 +5,28 @@ const createTeamIntoDB = async (payload: { teamName: string; members: string[] }
     const { teamName, members } = payload;
     // console.log(teamName, members)
 
-    // First verify all users exist
+    // First verify all users exist and check if they're already assigned to a team
     for (const userId of members) {
+        // Check if user exists
         const user = await prisma.user.findUnique({
-            where: { userId }
+            where: { userId },
+            include: {
+                teams: {
+                    include: {
+                        team: true
+                    }
+                }
+            }
         });
+        
         if (!user) {
             throw new Error(`User with userId ${userId} not found`);
+        }
+
+        // Check if user is already assigned to a team
+        if (user.teams.length > 0) {
+            const existingTeam = user.teams[0].team;
+            throw new Error(`User ${userId} is already assigned to team: ${existingTeam.teamName}`);
         }
     }
 

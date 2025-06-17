@@ -51,9 +51,15 @@ const getSingleProject = (0, catchAsync_1.default)((req, res) => __awaiter(void 
 }));
 //============update Project ==============
 const updateProject = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     const { id } = req.params;
     const payload = req.body;
-    const result = yield project_service_1.projectService.updateProjectInDB(id, payload);
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
+    const userRole = (_b = req.user) === null || _b === void 0 ? void 0 : _b.role;
+    if (!userId || !userRole) {
+        throw new Error("User information not found");
+    }
+    const result = yield project_service_1.projectService.updateProjectInDB(id, payload, userId, userRole);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,

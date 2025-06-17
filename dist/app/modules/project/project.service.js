@@ -91,15 +91,41 @@ const getSingleProjectFromDB = (id) => __awaiter(void 0, void 0, void 0, functio
     return result;
 });
 //=======================Update Project ====================
-const updateProjectInDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExist = yield prisma_1.default.project.findUnique({ where: { id } });
-    if (!isExist) {
+const updateProjectInDB = (id, payload, userId, userRole) => __awaiter(void 0, void 0, void 0, function* () {
+    // First get the project to check team ownership
+    const project = yield prisma_1.default.project.findUnique({
+        where: { id },
+        include: { team: true }
+    });
+    if (!project) {
         throw new Error("Project not found");
     }
-    // Update project with any provided fields
+    // Authorization check
+    if (userRole !== client_1.UserRole.admin) {
+        // For leader and coleader, check if they belong to the project's team
+        if (userRole === client_1.UserRole.leader || userRole === client_1.UserRole.coleader) {
+            // Check if project has a team assigned
+            if (!project.teamId) {
+                throw new Error("This project is not assigned to any team");
+            }
+            const userTeam = yield prisma_1.default.userAssignedTeam.findFirst({
+                where: {
+                    userId: userId,
+                    teamId: project.teamId
+                }
+            });
+            if (!userTeam) {
+                throw new Error("You can only update projects from your own team");
+            }
+        }
+        else {
+            throw new Error("You are not authorized to update projects");
+        }
+    }
+    // If authorization passes, proceed with update
     const result = yield prisma_1.default.project.update({
         where: { id },
-        data: payload,
+        data: Object.assign(Object.assign({}, payload), { teamId: payload.teamId === null ? null : payload.teamId }),
     });
     return result;
 });

@@ -1,5 +1,5 @@
 import prisma from "../../../lib/prisma"
-import { ProjectStatus, ClientStatus } from "@prisma/client";
+import { ProjectStatus, ClientStatus, UserRole } from "@prisma/client";
 
 const createProjectIntoDB = async (payload: any) => {
     const { projectName, projectId, station, deadline, value } = payload;
@@ -82,16 +82,48 @@ const getSingleProjectFromDB = async (id: string)=>{
 }
 
 //=======================Update Project ====================
-const updateProjectInDB = async (id: string, payload: any) => {
-    const isExist = await prisma.project.findUnique({ where: { id } });
-    if (!isExist) {
+const updateProjectInDB = async (id: string, payload: any, userId: string, userRole: UserRole) => {
+    // First get the project to check team ownership
+    const project = await prisma.project.findUnique({
+        where: { id },
+        include: { team: true }
+    });
+
+    if (!project) {
         throw new Error("Project not found");
     }
 
-    // Update project with any provided fields
+    // Authorization check
+    if (userRole !== UserRole.admin) {
+        // For leader and coleader, check if they belong to the project's team
+        if (userRole === UserRole.leader || userRole === UserRole.coleader) {
+            // Check if project has a team assigned
+            if (!project.teamId) {
+                throw new Error("This project is not assigned to any team");
+            }
+
+            const userTeam = await prisma.userAssignedTeam.findFirst({
+                where: { 
+                    userId: userId,
+                    teamId: project.teamId 
+                }
+            });
+
+            if (!userTeam) {
+                throw new Error("You can only update projects from your own team");
+            }
+        } else {
+            throw new Error("You are not authorized to update projects");
+        }
+    }
+
+    // If authorization passes, proceed with update
     const result = await prisma.project.update({
         where: { id },
-        data: payload,
+        data: {
+            ...payload,
+            teamId: payload.teamId === null ? null : payload.teamId
+        },
     });
 
     return result;
