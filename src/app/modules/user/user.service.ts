@@ -66,6 +66,57 @@ const updateUserInDB = async (id: string, payload: Partial<User>) => {
     throw new Error("User not found");
   }
 
+  //if trying to deactivate user, handle soft delete
+  if (payload.isActive === false && isExist.isActive === true) {
+    //using transaction to ensure all operations succeed or fail together
+    const result = await prisma.$transaction(async (tx) => {
+      //1. remove user from all team assignments
+      await tx.userAssignedTeam.deleteMany({
+        where: { userId: isExist.userId }
+      });
+      //2. remove user from all project assignments
+      await tx.userAssignedProject.deleteMany({
+        where: { userId: isExist.userId }
+      });
+      //3. remove user from all UI project members
+      await tx.projectUIMember.deleteMany({
+        where: { userId: isExist.userId }
+      });
+      //4. remove user from all frontend project members
+      await tx.projectFrontendMember.deleteMany({
+        where: { userId: isExist.userId }
+      });
+      //5. remove user from all backend project members
+      await tx.projectBackendMember.deleteMany({
+        where: { userId: isExist.userId }
+      });
+      //6. remove user from all chat room participants
+      await tx.chatRoomParticipant.deleteMany({
+        where: { userId: isExist.id }
+      });
+
+      //Set user's isActive to false
+      const updateUser = await tx.user.update({
+        where: { id },
+        data: { isActive: false },
+        select: {
+          id: true,
+          userId: true,
+          userName: true,
+          email: true,
+          role: true,
+          image: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
+      return updateUser;
+    })
+
+    return result;
+  }
+
   if (payload.password) {
     // If password is being updated, hash it
     payload.password = await bcrypt.hash(payload.password, 12);

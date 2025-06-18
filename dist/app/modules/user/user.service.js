@@ -67,6 +67,54 @@ const updateUserInDB = (id, payload) => __awaiter(void 0, void 0, void 0, functi
     if (!isExist) {
         throw new Error("User not found");
     }
+    //if trying to deactivate user, handle soft delete
+    if (payload.isActive === false && isExist.isActive === true) {
+        //using transaction to ensure all operations succeed or fail together
+        const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+            //1. remove user from all team assignments
+            yield tx.userAssignedTeam.deleteMany({
+                where: { userId: isExist.userId }
+            });
+            //2. remove user from all project assignments
+            yield tx.userAssignedProject.deleteMany({
+                where: { userId: isExist.userId }
+            });
+            //3. remove user from all UI project members
+            yield tx.projectUIMember.deleteMany({
+                where: { userId: isExist.userId }
+            });
+            //4. remove user from all frontend project members
+            yield tx.projectFrontendMember.deleteMany({
+                where: { userId: isExist.userId }
+            });
+            //5. remove user from all backend project members
+            yield tx.projectBackendMember.deleteMany({
+                where: { userId: isExist.userId }
+            });
+            //6. remove user from all chat room participants
+            yield tx.chatRoomParticipant.deleteMany({
+                where: { userId: isExist.id }
+            });
+            //Set user's isActive to false
+            const updateUser = yield tx.user.update({
+                where: { id },
+                data: { isActive: false },
+                select: {
+                    id: true,
+                    userId: true,
+                    userName: true,
+                    email: true,
+                    role: true,
+                    image: true,
+                    isActive: true,
+                    createdAt: true,
+                    updatedAt: true
+                }
+            });
+            return updateUser;
+        }));
+        return result;
+    }
     if (payload.password) {
         // If password is being updated, hash it
         payload.password = yield bcrypt_1.default.hash(payload.password, 12);
