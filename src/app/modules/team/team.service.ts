@@ -26,7 +26,7 @@ const createTeamIntoDB = async (payload: { teamName: string; members: string[] }
         // Check if user is already assigned to a team
         if (user.teams.length > 0) {
             const existingTeam = user.teams[0].team;
-            throw new Error(`User ${userId} is already assigned to team: ${existingTeam.teamName}`);
+            throw new Error(`User ${user.userName} with userId ${userId} is already assigned to team: ${existingTeam.teamName}`);
         }
     }
 
