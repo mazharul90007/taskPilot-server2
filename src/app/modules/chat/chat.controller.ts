@@ -97,8 +97,8 @@ const addParticipant = catchAsync(async (req: Request, res: Response) => {
   const result = await chatService.addParticipantToRoom(roomId, userId);
 
   // Safely access Socket.IO
-  const io: SocketServer = req.app.get('io');
-  io?.to(`chat_${roomId}`).emit('participantAdded', result);
+  const io: SocketServer = req.app.get("io");
+  io?.to(`chat_${roomId}`).emit("participantAdded", result);
 
   sendResponse(res, {
     statusCode: status.OK,
@@ -140,6 +140,22 @@ const getParticipants = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// Get User Rooms
+const getUserRooms = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  const participants = await chatService.getUserRooms(userId);
+
+  const rooms = participants.map((p) => p.chatRoom);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "User rooms retrieved successfully",
+    data: rooms,
+  });
+});
+
 export const chatController = {
   createRoom,
   sendMessage,
@@ -149,4 +165,5 @@ export const chatController = {
   addParticipant,
   removeParticipant,
   getParticipants,
+  getUserRooms,
 };

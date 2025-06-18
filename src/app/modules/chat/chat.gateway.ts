@@ -7,12 +7,12 @@ const prisma = new PrismaClient();
 
 export const chatGateway = (io: Server) => {
   io.on('connection', (socket: Socket) => {
-    console.log(`🟢 Connected: ${socket.id}`);
+    console.log(`Connected: ${socket.id}`);
 
     // Join chat room
     socket.on('join-room', async ({ roomId }) => {
       socket.join(roomId);
-      console.log(`📥 User joined room: ${roomId}`);
+      console.log(`User joined room: ${roomId}`);
 
       const messages = await prisma.message.findMany({
         where: { roomId },
@@ -34,7 +34,7 @@ export const chatGateway = (io: Server) => {
     });
 
     socket.on('disconnect', () => {
-      console.log(`🔴 Disconnected: ${socket.id}`);
+      console.log(`Disconnected: ${socket.id}`);
     });
   });
 };

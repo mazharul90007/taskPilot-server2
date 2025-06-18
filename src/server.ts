@@ -15,7 +15,7 @@ const io = new SocketIOServer(server, {
   },
 });
 
-chatGateway(io); // 🎯 Bind the gateway
+chatGateway(io); 
 
 server.listen(config.port, () => {
   console.log(`🚀 Server running on port ${config.port}`);

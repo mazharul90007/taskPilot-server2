@@ -74,10 +74,10 @@ const removeParticipantFromRoom = async (roomId: string, userId: string) => {
     where: {
       userId_chatRoomId: {
         userId,
-        chatRoomId: roomId
-      }
+        chatRoomId: roomId,
+      },
     },
-    include: { user: true }
+    include: { user: true },
   });
 
   // 2. Perform deletion
@@ -85,9 +85,9 @@ const removeParticipantFromRoom = async (roomId: string, userId: string) => {
     where: {
       userId_chatRoomId: {
         userId,
-        chatRoomId: roomId
-      }
-    }
+        chatRoomId: roomId,
+      },
+    },
   });
 
   // 3. Return formatted data
@@ -98,9 +98,9 @@ const removeParticipantFromRoom = async (roomId: string, userId: string) => {
     user: {
       id: participant.user.id,
       name: participant.user.userName,
-      email: participant.user.email
+      email: participant.user.email,
     },
-    removedAt: new Date()
+    removedAt: new Date(),
   };
 };
 
@@ -112,6 +112,29 @@ const getRoomParticipants = async (roomId: string) => {
   });
 };
 
+// Get User Rooms
+const getUserRooms = async (userId: string) => {
+  return await prisma.chatRoomParticipant.findMany({
+    where: { userId },
+    select: {
+      chatRoom: {
+        select: {
+          id: true,
+          name: true,
+          updatedAt: true,
+          projectId: true,
+          teamId: true,
+        },
+      },
+    },
+    orderBy: {
+      chatRoom: {
+        updatedAt: "desc", 
+      },
+    },
+  });
+};
+
 export const chatService = {
   saveMessageToDB,
   getMessagesFromDB,
@@ -120,4 +143,5 @@ export const chatService = {
   addParticipantToRoom,
   removeParticipantFromRoom,
   getRoomParticipants,
+  getUserRooms,
 };

@@ -9,8 +9,12 @@ router.post("/messages", chatController.sendMessage);
 router.get("/rooms/:roomId/messages", chatController.getRoomMessages);
 router.post("/rooms/join", chatController.joinRoom);
 
-router.post('/rooms/:roomId/participants',  chatController.addParticipant);
-router.delete('/rooms/:roomId/participants/:userId',  chatController.removeParticipant);
-router.get('/rooms/:roomId/participants', chatController.getParticipants);
+router.post("/rooms/:roomId/participants", chatController.addParticipant);
+router.delete(
+  "/rooms/:roomId/participants/:userId",
+  chatController.removeParticipant
+);
+router.get("/rooms/:roomId/participants", chatController.getParticipants);
+router.get("/rooms/:userId", chatController.getUserRooms);
 
 export const chatRoutes = router;
