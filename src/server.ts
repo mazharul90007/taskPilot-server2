@@ -1,12 +1,22 @@
-import { Server } from "http";
-import app from "./app";
-import config from "./config";
-import { Server as SocketIO } from "socket.io";
+// src/server.ts
 
-async function main() {
-  const server: Server = app.listen(config.port, () => {
-    console.log("Sever is running on port ", config.port);
-  });
-}
+import http from 'http';
+import app from './app';
+import config from './config';
+import { Server as SocketIOServer } from 'socket.io';
+import { chatGateway } from './app/modules/chat/chat.gateway';
 
-main();
+const server = http.createServer(app);
+
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: config.frontend_base_url,
+    credentials: true,
+  },
+});
+
+chatGateway(io); // 🎯 Bind the gateway
+
+server.listen(config.port, () => {
+  console.log(`🚀 Server running on port ${config.port}`);
+});

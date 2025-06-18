@@ -9,10 +9,15 @@ import config from './config';
 
 
 const app: Application = express();
+
 app.use(cors({
-    origin: config.frontend_base_url, 
-    credentials: true
+  origin: [
+    'http://localhost:3000',
+    'https://task-pilot-client-eight.vercel.app'
+  ],
+  credentials: true
 }));
+
 app.use(cookieParser());
 
 // parser
