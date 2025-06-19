@@ -18,20 +18,18 @@ const app: Application = express();
 //   credentials: true
 // }));
 
-app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [
+app.use(
+  cors({
+    origin: [
       'http://localhost:3000',
-      'https://task-pilot-client-eight.vercel.app'
-    ];
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-}));
+      'http://localhost:3001',
+       'https://task-pilot-client-eight.vercel.app',
+    ], 
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  }),
+);
 
 app.use(cookieParser());
 
