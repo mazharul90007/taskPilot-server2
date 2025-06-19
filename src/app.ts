@@ -10,12 +10,27 @@ import config from './config';
 
 const app: Application = express();
 
+// app.use(cors({
+//   origin: [
+//     'http://localhost:3000',
+//     'https://task-pilot-client-eight.vercel.app'
+//   ],
+//   credentials: true
+// }));
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://task-pilot-client-eight.vercel.app'
-  ],
-  credentials: true
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://task-pilot-client-eight.vercel.app'
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
 }));
 
 app.use(cookieParser());
