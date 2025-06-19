@@ -10,6 +10,15 @@ TaskPilot Server is a robust backend for a task and project management platform,
 - **Payment Integration**: Stripe payments for project-related transactions
 - **Role-based Access Control**
 - **Soft Deletion**: Deactivate users and clean up assignments
+## Credentials for Testing:
+- **Admin Id:** U0001
+- **password:** 123456
+- **Leader Id:** U0002
+- **password:** 123456
+- **CoLeader Id:** U0003
+- **password:** 123456
+- **Member Id:** U0004
+- **password:** 123456
 
 ## Tech Stack
 - **Node.js** + **Express**
