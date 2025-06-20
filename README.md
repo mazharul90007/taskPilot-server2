@@ -58,8 +58,8 @@ taskPilot-server/
 ## Setup & Installation
 1. **Clone the repository**
    ```bash
-   git clone <repo-url>
-   cd taskPilot-server
+   git clone <https://github.com/mazharul90007/taskPilot-server2>
+   cd taskPilot-server2
    ```
 2. **Install dependencies**
    ```bash
