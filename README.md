@@ -1,5 +1,5 @@
 # TaskPilot Server
-TaskPilot Server is a robust backend for a task and project management platform, built with Node.js, Express, Prisma, and MongoDB. It supports user authentication, team and project management, real-time chat, and payment processing.
+TaskPilot Server is a robust backend for a task and project management platform, built with Node.js, Express, Prisma, and MongoDB. It supports user authentication, team and project management, real-time chat, and payment processing system.
 ### Live link:  [Click Here](https://task-management-production-7b6f.up.railway.app)
 ### Postman Documentation:  [Click Here](https://documenter.getpostman.com/view/38506814/2sB2x8DqxC)
 ## Features
